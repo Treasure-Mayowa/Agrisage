@@ -2,13 +2,15 @@ const express = require('express')
 const path = require('path')
 const app = express()
 require("dotenv").config()
+const fetch = require('node-fetch')
 const bodyParser = require('body-parser')
+const { twiml } = require('twilio')
 const pino = require('express-pino-logger')()
 const client = require('twilio')(
     process.env.TWILIO_ACCOUNT_SID,
     process.env.TWILIO_AUTH_TOKEN
 )
-const { MessagingResponse } = require('twilio').twiml;
+const { MessagingResponse, VoiceResponse } = require('twilio').twiml
 
 const port = 3001
 
@@ -24,8 +26,6 @@ app.use(pino)
 app.get('', (req, res) => {
   res.sendFile(path.join(__dirname, 'build', 'index.html'))
 })
-
-
 
 app.post('/api/messages', (req, res) => {
     console.log('Received data:', req.body)
@@ -54,7 +54,7 @@ app.post('/api/messages', (req, res) => {
   });
   
 app.post('/api/sms', (req, res) => {
-  const twiml = new MessagingResponse()
+  var twiml = new MessagingResponse()
 
   var user_message = req.body.Body
 
@@ -72,16 +72,17 @@ app.post('/api/sms', (req, res) => {
 
   fetch("https://chat.nbox.ai/api/chat/completions", requestOptions)
     .then(response => response.json())
-    .then(result => 
-      message = result.choices[0].message.content,
-      twiml.message(message))
+    .then(result => {
+      let message = result.choices[0].message.content
+      twiml.message(message)
+    })
     .catch(error => console.log('error', error))
-    
+
   res.type('text/xml').send(twiml.toString())    
 })
 
-app.get('/api/greeting', (req, res) => {
-    const name = req.query.name || 'World';
-    res.setHeader('Content-Type', 'application/json');
-    res.send(JSON.stringify({ greeting: `Hello ${name}!` }));
-  });
+app.post('/api/call', (req, res) => {
+  var twiml = new VoiceResponse()
+  twiml.say({ voice: 'alice' }, "Welcome to Farmer's SMS! Feel free to message this number to begin this journey. I'll be here to guide you towards becoming more sustainable, just message me now")
+  res.type('text/xml').send(twiml.toString())
+})
