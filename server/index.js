@@ -75,10 +75,9 @@ app.post('/api/sms', (req, res) => {
     .then(result => {
       let message = result.choices[0].message.content
       twiml.message(message)
+      res.type('text/xml').send(twiml.toString())    
     })
-    .catch(error => console.log('error', error))
-
-  res.type('text/xml').send(twiml.toString())    
+    .catch(error => console.log('error', error))  
 })
 
 app.post('/api/call', (req, res) => {
