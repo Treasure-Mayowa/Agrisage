@@ -20,6 +20,7 @@ export default function WeatherInfo () {
     const getWeather = (event) => {
         event.preventDefault()
         setLoading(true)
+        setAlert([])
         fetch('/api/weather-alerts', {
             method: 'POST',
             headers: {
