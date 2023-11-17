@@ -65,7 +65,7 @@ app.post('/api/sms', (req, res) => {
     body: raw,
     headers: {
       "Content-Type": "application/json",
-      "Authorization": process.env.API_KEY
+      "Authorization": `${process.env.AI_API_KEY}`
     },
     redirect: 'follow'
   };
@@ -88,35 +88,37 @@ app.post('/api/call', (req, res) => {
 
 app.post('/api/generate', (req, res) => {
 
-  var raw = `{\n    \"temperature\": 0.7,\n    \"messages\": [\n      {\n        \"role\": \"system\",\n        \"content\": \"${process.env.ROLE}\"\n      },\n      {\n        \"role\": \"user\",\n        \"content\": \"${process.env.MESSAGING_CONTENT}\"\n      }\n    ],\n    \"model\": \"llama-2-chat-70b-4k\",\n    \"stream\": false,\n    \"max_tokens\": 1000\n  }`
+  var raw = `{
+    "temperature": 0.7,
+    "messages": [
+      {
+        "role": "system",
+        "content": "${process.env.ROLE}"
+      },
+      {
+        "role": "user",
+        "content": "${process.env.MESSAGING_CONTENT}"
+      }
+    ],
+    "model": "llama-2-chat-70b-4k",
+    "stream": false,
+    "max_tokens": 1000
+  }`
 
   var requestOptions = {
     method: 'POST',
-    body: JSON.stringify({
-      temperature: 0.7,
-      messages: [
-        {
-          role: "system",
-          content: process.env.ROLE
-        },
-        {
-          role: "user",
-          content: process.env.MESSAGING_CONTENT
-        }
-      ],
-      model: "llama-2-chat-70b-4k",
-      stream: true,
-      max_tokens: 1000
-    }),
     headers: {
       "Content-Type": "application/json",
       "Authorization": process.env.API_KEY
-    }
-  };
+    },
+    body: raw,
+    redirect: 'follow',
+  }
 
   fetch("https://chat.nbox.ai/api/chat/completions", requestOptions)
     .then(response => response.json())
     .then(result => {
+      console.log(result)
       let message = result.choices[0].message.content
       res.send(JSON.stringify({ "message": message })) 
     })

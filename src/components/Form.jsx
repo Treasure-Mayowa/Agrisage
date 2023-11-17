@@ -45,7 +45,7 @@ export default function Form () {
             .then(data => {
               if (data.success) {
                 setMessage('')
-                setSubmitting(true)
+                setSubmitting(false)
               } else {
                 setErrorMessage('Error in message sending')
                 setSubmitting(false)
